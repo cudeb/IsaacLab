@@ -38,6 +38,8 @@ from .direct_rl_env_cfg import DirectRLEnvCfg
 from .ui import ViewportCameraController
 from .utils.spaces import sample_space, spec_to_gym_space
 
+# create by lehome
+from omni.physx import acquire_physx_interface
 # import logger
 logger = logging.getLogger(__name__)
 
@@ -106,7 +108,11 @@ class DirectRLEnv(gym.Env):
             self.sim: SimulationContext = SimulationContext(self.cfg.sim)
         else:
             raise RuntimeError("Simulation context already exists. Cannot create a new one.")
-
+        
+        # create by lehome
+        self.physics_interface = acquire_physx_interface()
+        self.physics_interface.overwrite_gpu_setting(1)
+        
         # make sure torch is running on the correct device
         if "cuda" in self.device:
             torch.cuda.set_device(self.device)
