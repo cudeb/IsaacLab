@@ -60,7 +60,9 @@ class AppLauncher:
 
     """
 
-    def __init__(self, launcher_args: argparse.Namespace | dict | None = None, **kwargs):
+    def __init__(
+        self, launcher_args: argparse.Namespace | dict | None = None, **kwargs
+    ):
         """Create a `SimulationApp`_ instance based on the input settings.
 
         Args:
@@ -112,7 +114,9 @@ class AppLauncher:
 
         # Define config members that are read from env-vars or keyword args
         self._headless: bool  # 0: GUI, 1: Headless
-        self._livestream: Literal[0, 1, 2]  # 0: Disabled, 1: WebRTC public, 2: WebRTC private
+        self._livestream: Literal[
+            0, 1, 2
+        ]  # 0: Disabled, 1: WebRTC public, 2: WebRTC private
         self._offscreen_render: bool  # 0: Disabled, 1: Enabled
         self._sim_experience_file: str  # Experience file to load
 
@@ -145,14 +149,16 @@ class AppLauncher:
             omni.timeline.get_timeline_interface()
             .get_timeline_event_stream()
             .create_subscription_to_pop_by_type(
-                int(omni.timeline.TimelineEventType.STOP), lambda e: self._hide_play_button(True)
+                int(omni.timeline.TimelineEventType.STOP),
+                lambda e: self._hide_play_button(True),
             )
         )
         self._unhide_play_button_callback = (
             omni.timeline.get_timeline_interface()
             .get_timeline_event_stream()
             .create_subscription_to_pop_by_type(
-                int(omni.timeline.TimelineEventType.PLAY), lambda e: self._hide_play_button(False)
+                int(omni.timeline.TimelineEventType.PLAY),
+                lambda e: self._hide_play_button(False),
             )
         )
         # Set up signal handlers for graceful shutdown
@@ -172,7 +178,9 @@ class AppLauncher:
         if self._app is not None:
             return self._app
         else:
-            raise RuntimeError("The `AppLauncher.app` member cannot be retrieved until the class is initialized.")
+            raise RuntimeError(
+                "The `AppLauncher.app` member cannot be retrieved until the class is initialized."
+            )
 
     """
     Operations.
@@ -475,7 +483,9 @@ class AppLauncher:
                         " intended for the SimulationApp or change the name of the argument to avoid name conflicts."
                     )
                 # Print out values which will be used
-                print(f"[INFO][AppLauncher]: The argument '{key}' will be used to configure the SimulationApp.")
+                print(
+                    f"[INFO][AppLauncher]: The argument '{key}' will be used to configure the SimulationApp."
+                )
 
     def _config_resolution(self, launcher_args: dict):
         """Resolve the input arguments and environment variables.
@@ -484,7 +494,9 @@ class AppLauncher:
             launcher_args: A dictionary of all input arguments passed to the class object.
         """
         # Handle core settings
-        livestream_arg, livestream_env = self._resolve_livestream_settings(launcher_args)
+        livestream_arg, livestream_env = self._resolve_livestream_settings(
+            launcher_args
+        )
         self._resolve_headless_settings(launcher_args, livestream_arg, livestream_env)
         self._resolve_camera_settings(launcher_args)
         self._resolve_xr_settings(launcher_args)
@@ -506,13 +518,17 @@ class AppLauncher:
         # Remove all values from input keyword args which are not meant for SimulationApp
         # Assign all the passed settings to a dictionary for the simulation app
         self._sim_app_config = {
-            key: launcher_args[key] for key in set(AppLauncher._SIM_APP_CFG_TYPES.keys()) & set(launcher_args.keys())
+            key: launcher_args[key]
+            for key in set(AppLauncher._SIM_APP_CFG_TYPES.keys())
+            & set(launcher_args.keys())
         }
 
     def _resolve_livestream_settings(self, launcher_args: dict) -> tuple[int, int]:
         """Resolve livestream related settings."""
         livestream_env = int(os.environ.get("LIVESTREAM", 0))
-        livestream_arg = launcher_args.pop("livestream", AppLauncher._APPLAUNCHER_CFG_INFO["livestream"][1])
+        livestream_arg = launcher_args.pop(
+            "livestream", AppLauncher._APPLAUNCHER_CFG_INFO["livestream"][1]
+        )
         livestream_valid_vals = {0, 1, 2}
         # Value checking on LIVESTREAM
         if livestream_env not in livestream_valid_vals:
@@ -560,18 +576,24 @@ class AppLauncher:
                     "omni.services.livestream.nvcf",
                 ]
             else:
-                raise ValueError(f"Invalid value for livestream: {self._livestream}. Expected: 1, 2 .")
+                raise ValueError(
+                    f"Invalid value for livestream: {self._livestream}. Expected: 1, 2 ."
+                )
             sys.argv += self._livestream_args
 
         return livestream_arg, livestream_env
 
-    def _resolve_headless_settings(self, launcher_args: dict, livestream_arg: int, livestream_env: int):
+    def _resolve_headless_settings(
+        self, launcher_args: dict, livestream_arg: int, livestream_env: int
+    ):
         """Resolve headless related settings."""
         # Resolve headless execution of simulation app
         # HEADLESS is initially passed as an int instead of
         # the bool of headless_arg to avoid messy string processing,
         headless_env = int(os.environ.get("HEADLESS", 0))
-        headless_arg = launcher_args.pop("headless", AppLauncher._APPLAUNCHER_CFG_INFO["headless"][1])
+        headless_arg = launcher_args.pop(
+            "headless", AppLauncher._APPLAUNCHER_CFG_INFO["headless"][1]
+        )
         headless_valid_vals = {0, 1}
         # Value checking on HEADLESS
         if headless_env not in headless_valid_vals:
@@ -605,7 +627,9 @@ class AppLauncher:
     def _resolve_camera_settings(self, launcher_args: dict):
         """Resolve camera related settings."""
         enable_cameras_env = int(os.environ.get("ENABLE_CAMERAS", 0))
-        enable_cameras_arg = launcher_args.get("enable_cameras", AppLauncher._APPLAUNCHER_CFG_INFO["enable_cameras"][1])
+        enable_cameras_arg = launcher_args.get(
+            "enable_cameras", AppLauncher._APPLAUNCHER_CFG_INFO["enable_cameras"][1]
+        )
         enable_cameras_valid_vals = {0, 1}
         if enable_cameras_env not in enable_cameras_valid_vals:
             raise ValueError(
@@ -627,7 +651,9 @@ class AppLauncher:
         xr_arg = launcher_args.get("xr", AppLauncher._APPLAUNCHER_CFG_INFO["xr"][1])
         xr_valid_vals = {0, 1}
         if xr_env not in xr_valid_vals:
-            raise ValueError(f"Invalid value for environment variable `XR`: {xr_env} .Expected: {xr_valid_vals} .")
+            raise ValueError(
+                f"Invalid value for environment variable `XR`: {xr_env} .Expected: {xr_valid_vals} ."
+            )
         # We allow xr kwarg to supersede XR envvar
         if xr_arg is True:
             self._xr = xr_arg
@@ -641,7 +667,11 @@ class AppLauncher:
         #   This is different from offscreen_render because this only affects the default viewport and
         #   not other render-products in the scene
         self._render_viewport = True
-        if self._headless and not self._livestream and not launcher_args.get("video", False):
+        if (
+            self._headless
+            and not self._livestream
+            and not launcher_args.get("video", False)
+        ):
             self._render_viewport = False
 
         # hide_ui flag
@@ -655,7 +685,9 @@ class AppLauncher:
     def _resolve_device_settings(self, launcher_args: dict):
         """Resolve simulation GPU device related settings."""
         self.device_id = 0
-        device = launcher_args.get("device", AppLauncher._APPLAUNCHER_CFG_INFO["device"][1])
+        device = launcher_args.get(
+            "device", AppLauncher._APPLAUNCHER_CFG_INFO["device"][1]
+        )
 
         device_explicitly_passed = launcher_args.pop("device_explicit", False)
         if self._xr and not device_explicitly_passed:
@@ -676,13 +708,19 @@ class AppLauncher:
 
         # Raise an error for the deprecated cpu flag
         if launcher_args.get("cpu", False):
-            raise ValueError("The `--cpu` flag is deprecated. Please use `--device cpu` instead.")
+            raise ValueError(
+                "The `--cpu` flag is deprecated. Please use `--device cpu` instead."
+            )
 
         if "distributed" in launcher_args and launcher_args["distributed"]:
             # local rank (GPU id) in a current multi-gpu mode
-            self.local_rank = int(os.getenv("LOCAL_RANK", "0")) + int(os.getenv("JAX_LOCAL_RANK", "0"))
+            self.local_rank = int(os.getenv("LOCAL_RANK", "0")) + int(
+                os.getenv("JAX_LOCAL_RANK", "0")
+            )
             # global rank (GPU id) in multi-gpu multi-node mode
-            self.global_rank = int(os.getenv("RANK", "0")) + int(os.getenv("JAX_RANK", "0"))
+            self.global_rank = int(os.getenv("RANK", "0")) + int(
+                os.getenv("JAX_RANK", "0")
+            )
 
             self.device_id = self.local_rank
             device = "cuda:" + str(self.device_id)
@@ -695,7 +733,9 @@ class AppLauncher:
             os.environ["PXR_WORK_THREAD_LIMIT"] = str(num_threads_per_process)
             os.environ["OPENBLAS_NUM_THREADS"] = str(num_threads_per_process)
             # pass command line variable to kit
-            sys.argv.append(f"--/plugins/carb.tasking.plugin/threadCount={num_threads_per_process}")
+            sys.argv.append(
+                f"--/plugins/carb.tasking.plugin/threadCount={num_threads_per_process}"
+            )
 
         # set rendering device. We do not need to set physics_gpu because it will automatically pick the same one
         # as the active_gpu device. Setting physics_gpu explicitly may result in a different device to be used.
@@ -712,7 +752,9 @@ class AppLauncher:
 
         # If nothing is provided resolve the experience file based on the headless flag
         kit_app_exp_path = os.environ["EXP_PATH"]
-        isaaclab_app_exp_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), *[".."] * 4, "apps")
+        isaaclab_app_exp_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), *[".."] * 4, "apps"
+        )
         # For Isaac Sim 4.5 compatibility, we use the 4.5 app files in a different folder
         # if launcher_args.get("use_isaacsim_45", False):
         if self.is_isaac_sim_version_4_5():
@@ -724,24 +766,36 @@ class AppLauncher:
             if self._enable_cameras and not self._xr:
                 if self._headless and not self._livestream:
                     self._sim_experience_file = os.path.join(
-                        isaaclab_app_exp_path, "isaaclab.python.headless.rendering.kit"
+                        isaaclab_app_exp_path, "isaaclab.python.kit"
                     )
                 else:
-                    self._sim_experience_file = os.path.join(isaaclab_app_exp_path, "isaaclab.python.rendering.kit")
+                    self._sim_experience_file = os.path.join(
+                        isaaclab_app_exp_path, "isaaclab.python.kit"
+                    )
             elif self._xr:
                 if self._headless:
                     self._sim_experience_file = os.path.join(
-                        isaaclab_app_exp_path, "isaaclab.python.xr.openxr.headless.kit"
+                        isaaclab_app_exp_path, "isaaclab.python.kit"
                     )
                 else:
-                    self._sim_experience_file = os.path.join(isaaclab_app_exp_path, "isaaclab.python.xr.openxr.kit")
+                    self._sim_experience_file = os.path.join(
+                        isaaclab_app_exp_path, "isaaclab.python.kit"
+                    )
             elif self._headless and not self._livestream:
-                self._sim_experience_file = os.path.join(isaaclab_app_exp_path, "isaaclab.python.headless.kit")
+                self._sim_experience_file = os.path.join(
+                    isaaclab_app_exp_path, "isaaclab.python.kit"
+                )
             else:
-                self._sim_experience_file = os.path.join(isaaclab_app_exp_path, "isaaclab.python.kit")
+                self._sim_experience_file = os.path.join(
+                    isaaclab_app_exp_path, "isaaclab.python.kit"
+                )
         elif not os.path.isabs(self._sim_experience_file):
-            option_1_app_exp_path = os.path.join(kit_app_exp_path, self._sim_experience_file)
-            option_2_app_exp_path = os.path.join(isaaclab_app_exp_path, self._sim_experience_file)
+            option_1_app_exp_path = os.path.join(
+                kit_app_exp_path, self._sim_experience_file
+            )
+            option_2_app_exp_path = os.path.join(
+                isaaclab_app_exp_path, self._sim_experience_file
+            )
             if os.path.exists(option_1_app_exp_path):
                 self._sim_experience_file = option_1_app_exp_path
             elif os.path.exists(option_2_app_exp_path):
@@ -761,7 +815,9 @@ class AppLauncher:
 
         # Resolve the absolute path of the experience file
         self._sim_experience_file = os.path.abspath(self._sim_experience_file)
-        print(f"[INFO][AppLauncher]: Loading experience file: {self._sim_experience_file}")
+        print(
+            f"[INFO][AppLauncher]: Loading experience file: {self._sim_experience_file}"
+        )
 
     def _resolve_anim_recording_settings(self, launcher_args: dict):
         """Resolve animation recording settings."""
@@ -770,7 +826,9 @@ class AppLauncher:
         recording_enabled = launcher_args.get("anim_recording_enabled", False)
         if recording_enabled:
             if self._headless:
-                raise ValueError("Animation recording is not supported in headless mode.")
+                raise ValueError(
+                    "Animation recording is not supported in headless mode."
+                )
             if self.is_isaac_sim_version_4_5():
                 raise RuntimeError(
                     "Animation recording is not supported in Isaac Sim 4.5. Please update to Isaac Sim 5.0."
@@ -820,7 +878,9 @@ class AppLauncher:
             sys.argv = sys.argv[:idx] + sys.argv[idx + 1 :]
 
         # launch simulation app
-        self._app = SimulationApp(self._sim_app_config, experience=self._sim_experience_file)
+        self._app = SimulationApp(
+            self._sim_app_config, experience=self._sim_experience_file
+        )
         # enable sys stdout and stderr
         sys.stdout = sys.__stdout__
 
@@ -842,7 +902,12 @@ class AppLauncher:
         # Indicates whether rendering is required by the app.
         # Extensions required for rendering bring startup and simulation costs, so we do not
         # enable them if not required.
-        return not self._headless or self._livestream >= 1 or self._enable_cameras or self._xr
+        return (
+            not self._headless
+            or self._livestream >= 1
+            or self._enable_cameras
+            or self._xr
+        )
 
     def _load_extensions(self):
         """Load correct extensions based on AppLauncher's resolved config member variables."""
@@ -855,12 +920,16 @@ class AppLauncher:
         # set carb setting to indicate Isaac Lab's offscreen_render pipeline should be enabled
         # this flag is used by the SimulationContext class to enable the offscreen_render pipeline
         # when the render() method is called.
-        carb_settings_iface.set_bool("/isaaclab/render/offscreen", self._offscreen_render)
+        carb_settings_iface.set_bool(
+            "/isaaclab/render/offscreen", self._offscreen_render
+        )
 
         # set carb setting to indicate Isaac Lab's render_viewport pipeline should be enabled
         # this flag is used by the SimulationContext class to enable the render_viewport pipeline
         # when the render() method is called.
-        carb_settings_iface.set_bool("/isaaclab/render/active_viewport", self._render_viewport)
+        carb_settings_iface.set_bool(
+            "/isaaclab/render/active_viewport", self._render_viewport
+        )
 
         # set carb setting to indicate no RTX sensors are used
         # this flag is set to True when an RTX-rendering related sensor is created
@@ -868,7 +937,9 @@ class AppLauncher:
         carb_settings_iface.set_bool("/isaaclab/render/rtx_sensors", False)
 
         # set fabric update flag to disable updating transforms when rendering is disabled
-        carb_settings_iface.set_bool("/physics/fabricUpdateTransformations", self._rendering_enabled())
+        carb_settings_iface.set_bool(
+            "/physics/fabricUpdateTransformations", self._rendering_enabled()
+        )
 
         # in theory, this should ensure that dt is consistent across time stepping, but this is not the case
         # for now, we use the custom loop runner from Isaac Sim to achieve this
@@ -919,7 +990,9 @@ class AppLauncher:
             return
 
         # arg checks
-        if launcher_args.get("anim_recording_start_time") >= launcher_args.get("anim_recording_stop_time"):
+        if launcher_args.get("anim_recording_start_time") >= launcher_args.get(
+            "anim_recording_stop_time"
+        ):
             raise ValueError(
                 f"'anim_recording_start_time' {launcher_args.get('anim_recording_start_time')} must be less than"
                 f" 'anim_recording_stop_time' {launcher_args.get('anim_recording_stop_time')}"
@@ -945,7 +1018,9 @@ class AppLauncher:
     def is_isaac_sim_version_4_5(self) -> bool:
         if not hasattr(self, "_is_sim_ver_4_5"):
             # 1) Try to read the VERSION file (for manual / binary installs)
-            version_path = os.path.abspath(os.path.join(os.path.dirname(isaacsim.__file__), "../../VERSION"))
+            version_path = os.path.abspath(
+                os.path.join(os.path.dirname(isaacsim.__file__), "../../VERSION")
+            )
             if os.path.isfile(version_path):
                 with open(version_path) as f:
                     ver = f.readline().strip()
@@ -1034,8 +1109,14 @@ class AppLauncher:
                         return
 
                     # Case 2b: Tuple of tuples (4x4 matrix) OR List of lists (4x4 matrix)
-                    elif (isinstance(arg, tuple) and len(arg) == 4 and all(isinstance(row, tuple) for row in arg)) or (
-                        isinstance(arg, list) and len(arg) == 4 and all(isinstance(row, list) for row in arg)
+                    elif (
+                        isinstance(arg, tuple)
+                        and len(arg) == 4
+                        and all(isinstance(row, tuple) for row in arg)
+                    ) or (
+                        isinstance(arg, list)
+                        and len(arg) == 4
+                        and all(isinstance(row, list) for row in arg)
                     ):
                         float_list = [float(item) for row in arg for item in row]
                         original_matrix4d(self, *float_list)
@@ -1056,7 +1137,9 @@ class AppLauncher:
                                 return
                             # Try to extract as 4x4 matrix
                             elif len(arg) == 4 and all(len(row) == 4 for row in arg):
-                                float_list = [float(arg[i][j]) for i in range(4) for j in range(4)]
+                                float_list = [
+                                    float(arg[i][j]) for i in range(4) for j in range(4)
+                                ]
                                 original_matrix4d(self, *float_list)
                                 return
 
@@ -1076,7 +1159,9 @@ class AppLauncher:
                 try:
                     original_matrix4d(self, *args, **kwargs)
                 except Exception as inner_e:
-                    logger.error(f"Original Matrix4d constructor also failed: {inner_e}")
+                    logger.error(
+                        f"Original Matrix4d constructor also failed: {inner_e}"
+                    )
                     # Initialize as identity matrix if all else fails
                     original_matrix4d(self)
 
