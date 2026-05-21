@@ -400,7 +400,8 @@ class DirectRLEnv(gym.Env):
         # check if we need to do rendering within the physics loop
         # note: checked here once to avoid multiple checks within the loop
         is_rendering = self.sim.has_gui() or self.sim.has_rtx_sensors()
-
+        #print(f">> IS_RENDERING: {is_rendering}, has_gui: {self.sim.has_gui()}, has_rtx: {self.sim.has_rtx_sensors()}")
+        
         # perform physics stepping
         for _ in range(self.cfg.decimation):
             self._sim_step_counter += 1
@@ -409,7 +410,16 @@ class DirectRLEnv(gym.Env):
             # set actions into simulator
             self.scene.write_data_to_sim()
             # simulate
-            self.sim.step(render=False)
+            self.sim.step(render=True)
+            # After physics-only step, force physics state → USD write so that
+            # the subsequent sim.render() (which pauses physics via playSimulations=False
+            # and therefore suppresses the normal physics extension callbacks) can still
+            # see the updated USD data in the viewport.
+            if is_rendering:
+                self.physics_interface.update_transformations(
+                    False,  # updateToFastCache
+                    True,   # updateToUsd
+                )
             # render between steps only if the GUI or an RTX sensor needs it
             # note: we assume the render interval to be the shortest accepted rendering interval.
             #    If a camera needs rendering at a faster frequency, this will lead to unexpected behavior.
